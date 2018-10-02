@@ -12,7 +12,7 @@ use std::cmp::Ordering;
 ///   is returned, the search will continue through greater values.
 ///
 /// Returns the last entry that caused the `guide` function to return `true`.
-pub fn search<F>(tree: &sled::Tree, mut guide: F) -> sled::DbResult<Option<(Vec<u8>, Vec<u8>)>, ()>
+pub fn search<F>(tree: &sled::Tree, mut guide: F) -> sled::Result<Option<(Vec<u8>, Vec<u8>)>, ()>
 where
     F: FnMut(&[u8], &[u8]) -> (bool, Ordering),
 {
@@ -79,12 +79,12 @@ where
 /// 3. GOTO 1.
 ///
 /// The key has been found when the binary search in step 2. finds no keys that return `Some`.
-pub fn max(tree: &sled::Tree) -> sled::DbResult<Option<(Vec<u8>, Vec<u8>)>, ()> {
+pub fn max(tree: &sled::Tree) -> sled::Result<Option<(Vec<u8>, Vec<u8>)>, ()> {
     search(tree, |_k, _v| (true, Ordering::Less))
 }
 
 /// Find the greatest entry that precedes the given key.
-pub fn pred(tree: &sled::Tree, key: &[u8]) -> sled::DbResult<Option<(Vec<u8>, Vec<u8>)>, ()> {
+pub fn pred(tree: &sled::Tree, key: &[u8]) -> sled::Result<Option<(Vec<u8>, Vec<u8>)>, ()> {
     search(tree, |k, _v| match k >= key {
         true => (false, Ordering::Greater),
         false => (true, Ordering::Less),
@@ -92,7 +92,7 @@ pub fn pred(tree: &sled::Tree, key: &[u8]) -> sled::DbResult<Option<(Vec<u8>, Ve
 }
 
 /// Find the entry at the given key or the greatest that precedes it if no entry for the key exists.
-pub fn pred_incl(tree: &sled::Tree, key: &[u8]) -> sled::DbResult<Option<(Vec<u8>, Vec<u8>)>, ()> {
+pub fn pred_incl(tree: &sled::Tree, key: &[u8]) -> sled::Result<Option<(Vec<u8>, Vec<u8>)>, ()> {
     search(tree, |k, _v| match k > key {
         true => (false, Ordering::Greater),
         false => (true, Ordering::Less),
